@@ -1,0 +1,46 @@
+// Restaurants store the users data
+// Users store the data of the Restaurants
+
+// Visit count is cross-referenced to make sure no tampering is done
+
+Restaurant {
+    Users: [] User,
+    Name: String,
+    PT: Integer,
+    Image: [] Byte,
+    Address: String,
+    Prizes: [] Prize,
+    id: String (UUID),
+    history: [] Transaction
+}
+
+Prize {
+    Image: [] Byte,
+    Name: String,
+    id: String (UUID)
+}
+
+User {
+    First: String,
+    Last: String,
+    UserRestaurants: [] UserRestaurants, //Stores users points
+    id: String (UUID),
+    Phone: String,
+}
+
+Employee {
+    Owner: boolean,
+    First: String,
+    Last: String,
+    ResturantId: String (UUID),
+    id: String (UUID)
+}
+
+Transaction {
+    Time: DateTime,
+    (OPTIONAL) Approver: String (Employee ID + '/' + First + ' ' + Last),
+    Requestor: String (Customer ID + '/' + First + ' ' + Last),
+    Item: String (Prize ID),
+}
+
+UserRestaurants: (RestuarantId: String, Points: Integer)
