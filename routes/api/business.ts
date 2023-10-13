@@ -1,4 +1,6 @@
 import express from "express";
+import { initializeApp } from 'firebase/app';
+
 var router = express.Router();
 
 /* POST accept/decline visit */
@@ -6,10 +8,12 @@ var router = express.Router();
 /* Also saves the request/adds 1 to the user's visit amount */
 /* Removes from queue */
 
-router.post('my-business/visit/id:/accept', function(req, res) {
+router.post('my-business/visit/:visitId/accept', function(req, res) {
+
 })
 
-router.post('my-business/visit/id:/decline', function(req, res) {
+router.post('my-business/visit/:visitId/decline', function(req, res) {
+
 })
 
 /* POST accept/decline prize */
@@ -18,8 +22,12 @@ router.post('my-business/visit/id:/decline', function(req, res) {
 /* If decline, refunds points */
 /* Removes from queue */
 
-router.post('my-business/redeem/id:/accept', function(req, res) {
+/* Also moves into transaction history */
+router.post('my-business/redeem/:redeemId/accept', function(req, res) {
+
 })
 
-router.post('my-business/redeem/id:/decline', function(req, res) {
+/* Also moves into transaction history */
+router.post('my-business/redeem/:redeemId/decline', function(req, res) {
+
 })

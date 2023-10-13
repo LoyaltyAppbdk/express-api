@@ -26,6 +26,7 @@ User {
     UserRestaurants: [] UserRestaurants, //Stores users points
     id: String (UUID),
     Phone: String,
+    PW: String,
 }
 
 Employee {
@@ -33,7 +34,8 @@ Employee {
     First: String,
     Last: String,
     ResturantId: String (UUID),
-    id: String (UUID)
+    id: String (UUID),
+    PW: String
 }
 
 Transaction {
