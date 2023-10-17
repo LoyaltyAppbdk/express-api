@@ -11,7 +11,8 @@ Restaurant {
     Address: String,
     Prizes: [] Prize,
     id: String (UUID),
-    history: [] Transaction
+    history: [] Transaction,
+    queue: [] Transaction
 }
 
 Prize {
@@ -42,7 +43,8 @@ Transaction {
     Time: DateTime,
     (OPTIONAL) Approver: String (Employee ID + '/' + First + ' ' + Last),
     Requestor: String (Customer ID + '/' + First + ' ' + Last),
-    Item: String (Prize ID),
+    (OPTIONAL) Item: String (Prize ID),
+    isVisit: boolean
 }
 
 UserRestaurants: (RestuarantId: String, Points: Integer)

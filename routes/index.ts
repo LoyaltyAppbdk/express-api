@@ -26,7 +26,7 @@ router.post('new-user/', function(req, res) {
         //do we store jwt here?
     }
 
-    // Save in database here
+    // Save "user" obj in database here
 
     // generate JWT token
 
@@ -46,6 +46,7 @@ router.post('new-user/', function(req, res) {
 /* FUNC redeem remove */
 /* Subtracts threshold amt from user's total visits amt */  
 /* Returns confirmation msg */
+/* could be just a function */
 
 router.post('confirmed/', function(req, res) {
     
