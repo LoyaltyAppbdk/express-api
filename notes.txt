@@ -41,10 +41,13 @@ Employee {
 
 Transaction {
     Time: DateTime,
-    (OPTIONAL) Approver: String (Employee ID + '/' + First + ' ' + Last),
-    Requestor: String (Customer ID + '/' + First + ' ' + Last),
+    (OPTIONAL) ApproverId: String (Employee ID),
+    (OPTIONAL) ApproverName: String (First + ' ' + Last)
+    RequestorId: String (Customer ID),
+    RequestorName: String (First + ' ' + Last),
     (OPTIONAL) Item: String (Prize ID),
     isVisit: boolean
+    (OPTIONAL) isApproved: boolean
 }
 
 UserRestaurants: (RestuarantId: String, Points: Integer)

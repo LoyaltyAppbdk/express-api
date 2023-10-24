@@ -47,7 +47,7 @@ router.post('new-user/', function(req, res) {
 /* Subtracts threshold amt from user's total visits amt */  
 /* Returns confirmation msg */
 /* could be just a function */
-
+/* considering the post request is for redeeming items only */
 router.post('confirmed/', function(req, res) {
     
 })
