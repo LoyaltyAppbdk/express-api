@@ -54,13 +54,13 @@ function writeRestaurantData(restaurantId, restName, image, PT, users, prizes, h
 
 /**
  * 
- * @param {*} userId    Unique user ID
- * @param {*} firstName First name of user
- * @param {*} lastName  Last name of user
- * @param {*} userRest  Array of restaurants user uses
- * @param {*} phone     User's phone number
- * @param {*} email     User's email 
- * @param {*} imageUrl  Image url for user's profile picture
+ * @param {*} userId    Unique user ID (String)
+ * @param {*} firstName First name of user (String)
+ * @param {*} lastName  Last name of user (String)
+ * @param {*} userRest  Array of restaurants user users [restaurant1, restaurant2, ...]
+ * @param {*} phone     User's phone number (Int)
+ * @param {*} email     User's email (String)
+ * @param {*} imageUrl  Image url for user's profile picture ()
  */
 function writeUserData(userId, firstName, lastName, userRest, phone, email, imageUrl) {
   set(ref(database, 'users/' + userId), {
