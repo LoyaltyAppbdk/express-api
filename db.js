@@ -1,5 +1,6 @@
 import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set } from "firebase/database";
+import { getDatabase, ref, set, update } from "firebase/database";
+import { url } from "inspector";
 import { endianness } from "os";
 // import { getDatabase } from "firebase/database";
 
@@ -31,11 +32,10 @@ const database = getDatabase(app);
  * @param {*} queue         Array of transactions to be completed ([transaction])
  */
 function writeRestaurantData(restaurantId, restName, image, PT, users, prizes, history, queue, employees) {
-  const db = getDatabase();
-  set(ref(db, 'Restaurant/' + restaurantId), {
+  set(ref(database, 'restaurant/' + restaurantId), {
     "restName": restName,
     "image" : image,
-    "PT" : PT,
+    "pt" : PT,
     "users": users,
     "prizes" : prizes,
     "history" : history,
@@ -51,7 +51,6 @@ function writeRestaurantData(restaurantId, restName, image, PT, users, prizes, h
   });;
 }
 
-// writeRestaurantData(restaurantId, restName, image, PT, users, prizes, history, queue, employees);
 
 /**
  * 
@@ -64,8 +63,7 @@ function writeRestaurantData(restaurantId, restName, image, PT, users, prizes, h
  * @param {*} imageUrl  Image url for user's profile picture
  */
 function writeUserData(userId, firstName, lastName, userRest, phone, email, imageUrl) {
-  const db = getDatabase();
-  set(ref(db, 'Restaurant/' + userId), {
+  set(ref(database, 'users/' + userId), {
     "firstName": firstName,
     "lastName": lastName,
     "userRest" : userRest,
@@ -82,10 +80,61 @@ function writeUserData(userId, firstName, lastName, userRest, phone, email, imag
   });
 }
 
-// const db = getDatabase();
-// const starCountRef = ref(db, 'posts/' + postId + '/starCount');
-// onValue(starCountRef, (snapshot) => {
-//   const data = snapshot.val();
-//   updateStarCount(postElement, data);
-// });
+/**
+ * 
+ * @param {*} table       Selection of table for update
+ * @param {*} id          ID of restaurant or user to update field
+ * @param {*} target      Target field to update data
+ * @param {*} updatedData New Data to input
+ */
+function updateData(table, id, target, updatedData){
+  update(ref(database, table+ "/" + id), {
+    [target] : updatedData
+  })
+  .then(() =>{
+    console.log("Data successfully updated for " + id);
+  })
+  .catch((error) =>{
+    console.log("Data failed to updated for " + id +" | "+ error);
+    throw error;
+  });
+}
+
+
+
+/**
+ * Test Sample Data
+ */
+
+// const userId = 123;
+// const firstName = "ur";
+// const userRest = [];
+// const lastName = "mom";
+// const phone = 123112311;
+// const email = "anusisgreat@butfuckonly.com";
+// const imageUrl = "japaneseSchoolGirl696969696969"
+
+// const prize = {"image": "test", "name": "pizza", "id": "fuckmerightdaddy"};
+// const employee = {"owner": true, "firstName": "first", "lastName": "last", "restaurantId": 45, "id": 132}
+// const restaurantId = "1";
+// const restName = "testRest";
+// const PT = 5;
+// const image = "https://www.google.com/url?sa=i&url=https%3A%2F%2Fbuffer.com%2Flibrary%2Ffree-images%2F&psig=AOvVaw1gXkAl7uMrsQ0d2dgN7Tb9&ust=1698193519377000&source=images&cd=vfe&opi=89978449&ved=0CBAQjRxqFwoTCPie2P61jYIDFQAAAAAdAAAAABAE";
+// const address = "ur mom";
+// const prizes = [prize, prize];
+// const history = ["uranus"];
+// const queue = ["queue"];
+// const users = ["users", "users"];
+// const employees = [employee, employee]
+
+
+/**
+ * Test Sample Calls
+ */
+
+// writeRestaurantData(restaurantId, restName, image, PT, users, prizes, history, queue, employees);
+
+// writeUserData(userId, firstName, userRest, lastName, phone, email, imageUrl);
+
+// updateData("users", 123, "userRest", "mommy");
 
