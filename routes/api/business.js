@@ -1,5 +1,5 @@
-import express from "express";
-import { initializeApp } from 'firebase/app';
+const express = require('express');
+import { cors } from '../../constants/baseHeader';
 
 var router = express.Router();
 

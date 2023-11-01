@@ -1,6 +1,6 @@
-import express from "express";
-import { initializeApp } from 'firebase/app';
-import { generateUUID } from "../controllers/uuidGenerator";
+const express = require('express');
+const baseHeader = require('../constants/baseHeader');
+const generateUUID = require("../controllers/uuidGenerator");
 
 var router = express.Router();
 /* GET restaurants queue */
@@ -48,9 +48,17 @@ router.post('new-user/', function(req, res) {
 /* Returns confirmation msg */
 /* could be just a function */
 
-router.post('confirmed/', function(req, res) {
-    
+router.get('confirmed/', function(req, res) {
+    console.log('here')
 })
+
+router.get('/', (req, res) => { 
+    res.status(200); 
+    let header = baseHeader;
+    res.header = header;
+    console.log("here")
+    return res.send({"type" : "Welcome to root URL of Server"}); 
+}); 
 
 /* TODO: Add a history of accepted */
 module.exports = router;

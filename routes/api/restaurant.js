@@ -1,7 +1,12 @@
-import express from "express";
-import { initializeApp } from 'firebase/app';
+const express = require('express');
+import { cors } from '../../constants/baseHeader';
 
 var router = express.Router();
+
+router.get('/', (req, res)=>{ 
+    res.status(200); 
+    res.send("Welcome to root URL of Server"); 
+}); 
 
 /* GET users restaurants*/
 /* Returns: restaurant list*/
@@ -42,3 +47,5 @@ router.post('restaurants/restaurant/:restaurantId/visit/:visitId', function(req,
 /* Temp removes points */
 router.post('restaurants/restaurant/:restaurantId/redeem/:redeemId', function(req, res) {
 })
+
+module.exports = router;
