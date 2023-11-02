@@ -31,3 +31,5 @@ router.post('my-business/redeem/:redeemId/accept', function(req, res) {
 router.post('my-business/redeem/:redeemId/decline', function(req, res) {
 
 })
+
+module.exports = router;

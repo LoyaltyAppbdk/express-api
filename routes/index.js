@@ -48,8 +48,9 @@ router.post('new-user/', function(req, res) {
 /* Returns confirmation msg */
 /* could be just a function */
 
-router.get('confirmed/', function(req, res) {
+router.get('/confirmed/', function(req, res) {
     console.log('here')
+    res.send("confirmed")
 })
 
 
