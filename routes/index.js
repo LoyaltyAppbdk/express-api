@@ -52,13 +52,6 @@ router.get('confirmed/', function(req, res) {
     console.log('here')
 })
 
-router.get('/', (req, res) => { 
-    res.status(200); 
-    let header = baseHeader;
-    res.header = header;
-    console.log("here")
-    return res.send({"type" : "Welcome to root URL of Server"}); 
-}); 
 
 /* TODO: Add a history of accepted */
 module.exports = router;
