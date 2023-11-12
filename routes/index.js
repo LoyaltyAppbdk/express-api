@@ -39,7 +39,7 @@ router.post('new-user/', function(req, res) {
     }
 
     return frontUser
-})
+});
 
 /* TODO Frontend: make a sign-in page for resturant (employee) */
 
@@ -51,7 +51,7 @@ router.post('new-user/', function(req, res) {
 router.get('/confirmed/', function(req, res) {
     console.log('here')
     res.send("confirmed")
-})
+});
 
 
 /* TODO: Add a history of accepted */
