@@ -10,10 +10,8 @@ router.get('/', (req, res)=>{
 }); 
 
 /* 
-QUERY users restaurants
-Returns: restaurant list
-For each restaurant contains: string name, users points, restaurants pt threshold, image of restaurant 
-MY-POINTS PAGE 
+MY-POINTS PAGE
+Retrieves UserRestaurants from User (via userId)
 */
 router.query('restaurants/all/', function(req, res) {
     const userId = req['userId'];
@@ -53,7 +51,6 @@ router.query('restaurants/all/', function(req, res) {
 RESTAURANT/RESTAURANT-ID PAGE 
 Returns details information for a specific restaurant, including how many visits the user has, etc.
 */
-
 router.query('restaurants/restaurant/:restaurantId', function(req, res) {
     const userId = req['userId'];
     const restuarantId = req.params.restaurantId;
@@ -83,7 +80,7 @@ router.query('restaurants/restaurant/:restaurantId', function(req, res) {
     res.send(restaurantObject);
 });
 
-// Sends transaction request into the restaurant's queue to get visit approved
+// Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
 router.post('restaurants/restaurant/:restaurantId/visit/', function(req, res) {
     const userId = req['userId'];
@@ -124,10 +121,8 @@ router.post('restaurants/restaurant/:restaurantId/visit/', function(req, res) {
     res.status(200);
 });
 
-/* POST prize selection */
-/* Sends: user's name, ID as well as their item (string) */
-/* Validates first in the database that they have reached the threshold */
-/* Temp removes points */
+// Sends transaction request into the restaurant's queue to get prize redemption approved - Sent from the user side
+/* Validates first in the database that they have reached the threshold */ 
 router.post('restaurants/restaurant/:restaurantId/redeem/', function(req, res) {
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
     const requestorName = `${req['userId']}/${req['firstName']} ${req['lastName']}` 
