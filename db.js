@@ -9,7 +9,7 @@ import { endianness } from "os";
 const firebaseConfig = {
   // ...
   // The value of `databaseURL` depends on the location of the database
-  databaseURL: "https://rewardsapp-43234-default-rtdb.firebaseio.com",
+  databaseURL: "https://rewards-c59a2-default-rtdb.firebaseio.com/ ",
 };
 
 // Initialize Firebase
@@ -100,6 +100,13 @@ function updateData(table, id, target, updatedData){
   });
 }
 
+// Function: we can locate the restaurant and 
+
+// Function: insert the redeemTransaction item into the queue list
+
+// Function: Inserts userRedeemTransaction to the user's history list
+
+// Function: Returns restaurant name, address, prizes
 
 
 /**
