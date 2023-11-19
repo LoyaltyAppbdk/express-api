@@ -10,10 +10,27 @@ Restaurant {
     Image: [] Byte,
     Address: String,
     Prizes: [] Prize,
-    id: String (UUID),
-    history: [] Transaction,
-    queue: [] Transaction,
-    userPoints: {K: (userId: String) / V: (points: Integer)} , // Stores users points
+    id: String (UUID)
+}
+
+RestaurantEmployees {
+    K: restaurantId, V: [] Employee
+}
+
+RestaurantHistory {
+    K: restaurantId, V: history [] Transaction
+}
+
+RestaurantQueue {
+    K: restaurantId, V: queue [] Transaction
+}
+
+userPoints {
+    K: userId (string), V: points (integer)
+}
+
+userTransactions {
+    K uuid, V: [] Transaction 
 }
 
 Prize {

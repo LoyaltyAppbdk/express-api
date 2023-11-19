@@ -1,7 +1,7 @@
-import { initializeApp } from "firebase/app";
-import { getDatabase, ref, set, update } from "firebase/database";
-import { url } from "inspector";
-import { endianness } from "os";
+const { initializeApp } =  require("firebase/app");
+const { getDatabase, ref, set, update, get } =  require("firebase/database");
+const { url } =  require("inspector");
+const { endianness } =  require("os");
 // import { getDatabase } from "firebase/database";
 
 // TODO: Replace the following with your app's Firebase project configuration
@@ -9,7 +9,7 @@ import { endianness } from "os";
 const firebaseConfig = {
   // ...
   // The value of `databaseURL` depends on the location of the database
-  databaseURL: "https://rewards-c59a2-default-rtdb.firebaseio.com/ ",
+  databaseURL: "https://rewards-c59a2-default-rtdb.firebaseio.com/",
 };
 
 // Initialize Firebase
@@ -18,6 +18,9 @@ const app = initializeApp(firebaseConfig);
 
 // Initialize Realtime Database and get a reference to the service
 const database = getDatabase(app);
+
+// Set a reference for the database
+const databaseRef = ref(database);
 
 
 /**
@@ -100,15 +103,85 @@ function updateData(table, id, target, updatedData){
   });
 }
 
-// Function: we can locate the restaurant and 
+// https://github.com/firebase/snippets-web/tree/d781c67b528afe99fcdb7c7056104772463fa3ec/snippets/database-next/read-and-write
 
-// Function: insert the redeemTransaction item into the queue list
+// Given an object type, id, boolean, and field, query and return that object. If the field is empty, return the whole object. If the boolean is false, exclude the fields when returning the object
+function queryDbStatic(objectType, path, exclude, fields) {
+  get(ref(database, `${objectType}/${path}`)).then((snapshot) => {
+    if (snapshot.exists()) {
+      // The object retrieved from the database query
+      let fullObject = snapshot.val();
+      // filteredObject is the return object
+      let filteredObject = {};
 
-// Function: Inserts userRedeemTransaction to the user's history list
+      // If exclude = false, then we keep all other attributes not contained in fields list
+      // If execute = true, then we keep only the attributes contained in fields list
+      if(exclude) {
+        // for loop does not execute if empty or null
+        // filters out the necessary fields
+        filteredObject = fullObject;
 
-// Function: Returns restaurant name, address, prizes
+        for(field of fields) {
+          delete filteredObject[field]; // filter out (remove) the desired field
+        }
 
+      } else {
+        // This grabs the necessary fields
 
+        for(let field of fields) {
+          filteredObject[field] = snapshot.val()[field];
+        }
+      }
+
+      // If filteredObject not empty (AKA fields are provided) then we set fullObject to filteredObject 
+      fullObject = (JSON.stringify(filteredObject) === '{}' ? fullObject : filteredObject );
+
+      console.log(fullObject)
+      return fullObject;
+
+    } else {
+      console.log("No data available");
+      return new Error("No data available");
+    }
+  }).catch((error) => {
+    console.error(error);
+    return error;
+  });
+}
+
+queryDbStatic('restaurant', '1', false, ['pt', 'employees']);
+
+function updateArrayElement(objectType, id, key, value, isArray) {
+  if(isArray){
+
+  } else {
+      const newPostKey = push(child(ref(database), 'posts')).key;
+  }
+
+}
+
+function appendArrayElement() {
+
+}
+
+function removeArrayElement() {
+
+}
+
+function getArrayElement() {
+
+}
+
+// From queue to history - maybe we don't abstract this
+function moveArrayElement() {
+  getArrayElement();
+  appendArrayElement();
+  removeArrayElement();
+}
+
+function initializeDb() {
+  
+}
 /**
  * Test Sample Data
  */
@@ -145,3 +218,40 @@ function updateData(table, id, target, updatedData){
 
 // updateData("users", 123, "userRest", "mommy");
 
+
+
+
+
+
+
+
+
+// // The object retrieved from the database query
+// let fullObject = snapshot.val();
+// // filteredObject is the return object
+// let filteredObject = {};
+
+// // If exclude = false, then we keep all other attributes not contained in fields list
+// // If execute = true, then we keep only the attributes contained in fields list
+// if(exclude) {
+//   // for loop does not execute if empty or null
+//   // filters out the necessary fields
+//   filteredObject = fullObject;
+
+//   for(field of fields) {
+//     delete filteredObject[field]; // filter out (remove) the desired field
+//   }
+
+// } else {
+//   // This grabs the necessary fields
+
+//   for(field of fields) {
+//     filteredObject[field] = snapshot.val()[field];
+//   }
+// }
+
+// // If filteredObject not empty (AKA fields are provided) then we set fullObject to filteredObject 
+// fullObject = (JSON.stringify(filteredObject) === '{}' ? fullObject :filteredObject );
+
+// console.log(fullObject)
+// return fullObject;
