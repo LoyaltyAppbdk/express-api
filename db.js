@@ -22,67 +22,6 @@ const database = getDatabase(app);
 // Set a reference for the database
 const databaseRef = ref(database);
 
-
-/**
- * 
- * @param {*} restaurantId  Unique restaurant ID (String)
- * @param {*} restName      Name for Restaurant (String)
- * @param {*} image         Image url for resturant (String)
- * @param {*} PT            Point Threshold (Int)
- * @param {*} users         Array of User objects ([User1, User2,...])
- * @param {*} prizes        Array of Prize objects ([Prize1, Prize2])
- * @param {*} history       Array of transaction history ([transaction])
- * @param {*} queue         Array of transactions to be completed ([transaction])
- */
-function writeRestaurantData(restaurantId, restName, image, PT, users, prizes, history, queue, employees) {
-  set(ref(database, 'restaurant/' + restaurantId), {
-    "restName": restName,
-    "image" : image,
-    "pt" : PT,
-    "users": users,
-    "prizes" : prizes,
-    "history" : history,
-    "queue" : queue,
-    "employees": employees
-  })
-  .then(() =>{
-    console.log("Restaurant data successfully written for " + restaurantId);
-  })
-  .catch((error) =>{
-    console.log("Restaurant data failed to write for " + restaurantId +" | "+ error);
-    throw error;
-  });;
-}
-
-
-/**
- * 
- * @param {*} userId    Unique user ID (String)
- * @param {*} firstName First name of user (String)
- * @param {*} lastName  Last name of user (String)
- * @param {*} userRest  Array of restaurants user users [restaurant1, restaurant2, ...]
- * @param {*} phone     User's phone number (Int)
- * @param {*} email     User's email (String)
- * @param {*} imageUrl  Image url for user's profile picture ()
- */
-function writeUserData(userId, firstName, lastName, userRest, phone, email, imageUrl) {
-  set(ref(database, 'users/' + userId), {
-    "firstName": firstName,
-    "lastName": lastName,
-    "userRest" : userRest,
-    "phone" : phone,
-    "email" : email,
-    "imageUrl" : imageUrl
-  })
-  .then(() =>{
-    console.log("User data successfully written for " + userId);
-  })
-  .catch((error) =>{
-    console.log("User data failed to write for " + userId +" | "+ error);
-    throw error;
-  });
-}
-
 /**
  * 
  * @param {*} table       Selection of table for update
@@ -104,6 +43,21 @@ function updateData(table, id, target, updatedData){
 }
 
 // https://github.com/firebase/snippets-web/tree/d781c67b528afe99fcdb7c7056104772463fa3ec/snippets/database-next/read-and-write
+
+
+
+function writeDb(table, object){
+  Object.keys(object).forEach((key) => {
+    set(ref(database, `${table}/` + key), object[key])
+    .then(() =>{
+      console.log("User data successfully written for " + key);
+    })
+    .catch((error) =>{
+      console.log("User data failed to write for " + userId +" | "+ error);
+      throw error;
+    });
+  })
+}
 
 // Given an object type, id, boolean, and field, query and return that object. If the field is empty, return the whole object. If the boolean is false, exclude the fields when returning the object
 function queryDbStatic(objectType, path, exclude, fields) {
@@ -149,8 +103,6 @@ function queryDbStatic(objectType, path, exclude, fields) {
   });
 }
 
-queryDbStatic('restaurant', '1', false, ['pt', 'employees']);
-
 function updateArrayElement(objectType, id, key, value, isArray) {
   if(isArray){
 
@@ -180,6 +132,7 @@ function moveArrayElement() {
 }
 
 function initializeDb() {
+  // objects
     const userA = {
       first: "Eren",
       last: "Yeager",
@@ -261,11 +214,76 @@ function initializeDb() {
 
     const transactionB = {
       time: null,
-      approver: ""
+      approver: "eb/Austin Han",
+      requestor: "3323-1sf2-oupq-01pb/Joe Goldberg",
+      isVisit: false,
+      id: "tb",
+      status: "denied"
     }
 
+    const transactionC = {
+      time: null,
+      approver: null,
+      requestor: "3323-1sf2-oupq-01pb/Joe Goldberg",
+      isVisit: false,
+      item: "pb",
+      id: "tc",
+      status: "denied"
+    }
+
+    // tables
+    const restaurants = {
+      "ra": restaurantA,
+      "rb": restaurantB
+    }
+
+    const users = {
+      "3323-1sf2-oupq-01pa": userA,
+      "3323-1sf2-oupq-01pb": userB
+    }
+
+    const employees = {
+      "ea": employeeA,
+      "eb": employeeB
+    }
+
+    const userTransactions = {
+      "3323-1sf2-oupq-01pa": {
+        "tb": transactionB,
+      },
+      "3323-1sf2-oupq-01pa": {
+        "ta": transactionA,
+        "tc": transactionC
+      }
+    } 
+
+    const restaurantQueue = {
+      "ra": {
+        "tc": transactionC
+      },
+      "rb": {}
+    }
+
+    const restaurantHistory = {
+      "ra": {
+        "ta": transactionA
+        // transactionC excluded on purpose
+      },
+      "rb": {
+        "tb": transactionB
+      }
+    }
     
+    writeDb("restaurants", restaurants);
+    writeDb("users", users);
+    writeDb("employees", employees);
+    writeDb("userTransactions", userTransactions);
+    writeDb("restaurantQueue", restaurantQueue);
+    writeDb("restaurantHistory", restaurantHistory);
+
 }
+
+initializeDb();
 /**
  * Test Sample Data
  */
