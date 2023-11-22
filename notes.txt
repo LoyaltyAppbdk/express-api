@@ -4,7 +4,7 @@
 // Visit count is cross-referenced to make sure no tampering is done
 
 Restaurant {
-    Users: [] User,
+    Users: [] uuid,
     Name: String,
     PT: Integer,
     Image: [] Byte,

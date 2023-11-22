@@ -180,7 +180,91 @@ function moveArrayElement() {
 }
 
 function initializeDb() {
+    const userA = {
+      first: "Eren",
+      last: "Yeager",
+      id: "3323-1sf2-oupq-01pa",
+      phone: "000-000-000",
+      pw: "123123123",
+      userRestaurants: ["a"]
+    }
+
+    const userB = {
+      first: "Joe",
+      last: "Goldberg",
+      id: "3323-1sf2-oupq-01pb",
+      phone: "000-000-000",
+      pw: "123123123",
+      userRestaurants: ["a", "b"]
+    }
+
+    const prizeA = {
+      image: "stringByte",
+      name: "pork intestine gui",
+      id: "pa"
+    }
+
+    const prizeB = {
+      image: "stringByte",
+      name: "tik tok pookie",
+      id: "pb"
+    }
+
+    const restaurantA = {
+      id: "ra",
+      users: ["3323-1sf2-oupq-01pa"],
+      name: "gopchang",
+      pt: 100,
+      image: "stringByte",
+      address: "something something address here",
+      prizes: [prizeA, prizeB],
+      employees: ["ea"]
+    }
+
+    const restaurantB = {
+      id: "rb",
+      users: ["3323-1sf2-oupq-01pa", "3323-1sf2-oupq-01pb"],
+      name: "Yolo Chicken",
+      pt: 100,
+      image: "stringByte",
+      address: "somewhere somewhere CP",
+      prizes: [prizeB],
+      employees: ["eb"]
+    }
+
+    const employeeA = {
+      owner: true,
+      first: "randomFirst",
+      last: "randomLast",
+      restuarantId: "ra",
+      id: "ea",
+      pw: "pw"
+    }
+
+    const employeeB = {
+      owner: true,
+      first: "Austin",
+      last: "Han",
+      restaurantId: "rb",
+      id: "eb",
+      pw: "pw"
+    }
   
+    const transactionA = {
+      time: null,
+      approver: "ea/randomFirst randomLast",
+      requestor: "3323-1sf2-oupq-01pa/Eren Yeager",
+      isVisit: true,
+      id: "ta",
+      status: "approved"
+    }
+
+    const transactionB = {
+      time: null,
+      approver: ""
+    }
+
+    
 }
 /**
  * Test Sample Data
