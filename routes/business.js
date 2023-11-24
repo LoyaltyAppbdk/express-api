@@ -1,6 +1,6 @@
 const express = require('express');
-import { cors } from '../../constants/baseHeader';
-const generateUUID = require("../../controllers/uuidGenerator");
+import { cors } from '../constants/baseHeader';
+const generateUUID = require("../controllers/uuidGenerator");
 
 var router = express.Router();
 

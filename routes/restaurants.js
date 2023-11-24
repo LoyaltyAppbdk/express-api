@@ -1,6 +1,6 @@
 const express = require('express');
-import { cors } from '../../constants/baseHeader';
-const generateUUID = require("../../controllers/uuidGenerator");
+const generateUUID = require("../controllers/uuidGenerator.js");
+const { writeDb, queryDbStatic } = require('../db.js')
 
 var router = express.Router();
 
@@ -13,45 +13,55 @@ router.get('/', (req, res)=>{
 MY-POINTS PAGE
 Retrieves UserRestaurants from User (via userId)
 */
-router.query('restaurants/all/', function(req, res) {
-    const userId = req['userId'];
+router.get('/all/', async (req, res) => {
+    
+    const userId = req.header('userId');
+    let query;
 
     try {
-    // Query for the user's restaurant list using userId variable
-    const query = [];
+        // Query for the user's restaurant list using userId variable
+        query = await queryDbStatic("users", userId, false, ["userRestaurants"]);
     } catch (error) {
-
+        console.log(error)
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
     }
-
     // List of restaurantObject (return object)
     let restaurants = [];
-
     // userRestaurant includes restaurantId and Points
-    for (userRestaurant in query) {
+    for (let userRestaurant of query['userRestaurants']) {
+        try {
+
+            // restaurant is the queried single restaurant object using userRestaurant.id
+            const restaurant = await queryDbStatic("restaurants", userRestaurant, true, []);
+
+            // creates JSON for parsing on client-side
+            let restaurantObject = {
+                name: restaurant.name,
+                image: restaurant.image,
+                // Need to add to the initiate
+                currentVisit: userRestaurant.points,
+                pt: restaurant.pt,
+            }
+
+            // adds to list of general-view businesses
+            restaurants.push(restaurantObject);
         
-        // restaurant is the queried single restaurant object using userRestaurant.id
-        let restaurant = null;
-        // creates JSON for parsing on client-side
-        let restaurantObject = {
-            name: restaurant.name,
-            image: restaurant.image,
-            currentVisit: userRestaurant.points,
-            pt: restaurant.pt,
+            // returns the list of general-view businesses
+            res.send(restaurants);
+        } catch (error) {
+            console.log(error)
+            res.status(500);
+            res.send("Uh oh! Something went wrong, please check back later.");
         }
-        // adds to list of general-view businesses
-        restaurants.concat(restaurantObject);
     }
-    // returns the list of general-view businesses
-    res.send(restaurantObject);
 });
 
 /* 
 RESTAURANT/RESTAURANT-ID PAGE 
 Returns details information for a specific restaurant, including how many visits the user has, etc.
 */
-router.query('restaurants/restaurant/:restaurantId', function(req, res) {
+router.get('/restaurant/:restaurantId', function(req, res) {
     const userId = req['userId'];
     const restuarantId = req.params.restaurantId;
 
@@ -82,7 +92,7 @@ router.query('restaurants/restaurant/:restaurantId', function(req, res) {
 
 // Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
-router.post('restaurants/restaurant/:restaurantId/visit/', function(req, res) {
+router.post('/restaurant/:restaurantId/visit/', function(req, res) {
     const userId = req['userId'];
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
     const requestorName = `${userId}/${req['firstName']} ${req['lastName']}`
@@ -108,10 +118,11 @@ router.post('restaurants/restaurant/:restaurantId/visit/', function(req, res) {
     }
     
     try {
+
         // Need to make a db call where we can locate the restaurant and insert the visitTransaction item into the queue list
 
         // Inserts userVisitTransaction to the user's history list
-        // Need to find a way to limit to 25
+        
     } catch (error) {
 
         res.status(500);
@@ -123,7 +134,7 @@ router.post('restaurants/restaurant/:restaurantId/visit/', function(req, res) {
 
 // Sends transaction request into the restaurant's queue to get prize redemption approved - Sent from the user side
 /* Validates first in the database that they have reached the threshold */ 
-router.post('restaurants/restaurant/:restaurantId/redeem/', function(req, res) {
+router.post('/restaurant/:restaurantId/redeem/', function(req, res) {
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
     const requestorName = `${req['userId']}/${req['firstName']} ${req['lastName']}` 
     const restaurantId = req.params.restaurantId;
@@ -145,12 +156,12 @@ router.post('restaurants/restaurant/:restaurantId/redeem/', function(req, res) {
         status: "REQUESTED",
         restaurantId: restaurantId,
         restaurantName: restaurantName,
-        transactionId: transactionId
+        transactionId: transactionId 
     }
     
     try {
         // Need to make a db call where we can locate the restaurant and insert the redeemTransaction item into the queue list
-         
+        
         // Inserts userRedeemTransaction to the user's history list
         // Need to find a way to limit to 25
     } catch (error) {
