@@ -26,12 +26,17 @@ router.get('/all/', async (req, res) => {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
     }
+
     // List of restaurantObject (return object)
     let restaurants = [];
-    // userRestaurant includes restaurantId and Points
-    for (let userRestaurant of query['userRestaurants']) {
-        try {
 
+    // List of customer visited restaurants with the points - retrieved from user query
+    let userRestaurants = query['userRestaurants'];
+    
+    // userRestaurant includes restaurantId and Points
+    for (let userRestaurant in userRestaurants) {
+        try {
+            console.log("userRestaurant", userRestaurant)
             // restaurant is the queried single restaurant object using userRestaurant.id
             const restaurant = await queryDbStatic("restaurants", userRestaurant, true, []);
 
@@ -39,8 +44,8 @@ router.get('/all/', async (req, res) => {
             let restaurantObject = {
                 name: restaurant.name,
                 image: restaurant.image,
-                // Need to add to the initiate
-                currentVisit: userRestaurant.points,
+                // Retrieves from userRestaurants query object, using the key from the current loop to get the point
+                currentVisit: userRestaurants[userRestaurant],
                 pt: restaurant.pt,
             }
 

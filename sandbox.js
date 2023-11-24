@@ -8,7 +8,7 @@ function initializeDb () {
         id: "3323-1sf2-oupq-01pa",
         phone: "000-000-000",
         pw: "123123123",
-        userRestaurants: ["ra"]
+        userRestaurants: {ra: 10}
       }
 
       const userB = {
@@ -17,7 +17,7 @@ function initializeDb () {
         id: "3323-1sf2-oupq-01pb",
         phone: "000-000-000",
         pw: "123123123",
-        userRestaurants: ["ra", "rb"]
+        userRestaurants: {ra: 20, rb: 54}
       }
 
       const prizeA = {
@@ -153,4 +153,4 @@ function initializeDb () {
   }
 
   // queryDbStatic("restaurants", "ra", false, ["address"]);
-  // initializeDb();
+  initializeDb();

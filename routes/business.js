@@ -1,5 +1,4 @@
 const express = require('express');
-import { cors } from '../constants/baseHeader';
 const generateUUID = require("../controllers/uuidGenerator");
 
 var router = express.Router();
@@ -88,7 +87,7 @@ router.post('my-business/redeem/:redeemId/decline', function(req, res) {
     }
 });
 
-router.query('my-business/requests', function(req, res) {
+router.get('my-business/requests', function(req, res) {
     // Retrieves the businessId from the request in order to query for the requests 
     const restaurantId = req['restaurantId'];
     try {
