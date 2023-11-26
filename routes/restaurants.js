@@ -66,31 +66,35 @@ router.get('/all/', async (req, res) => {
 RESTAURANT/RESTAURANT-ID PAGE 
 Returns details information for a specific restaurant, including how many visits the user has, etc.
 */
-router.get('/restaurant/:restaurantId', function(req, res) {
-    const userId = req['userId'];
-    const restuarantId = req.params.restaurantId;
+router.get('/restaurant/:restaurantId', async (req, res) => {
+
+    const userId = req.header('userId');
+    const restaurantId = req.params.restaurantId;
+    let userPoints, restaurant;
 
     try {
         // Queried restaurant object using restaurant Id (exclude Users array in the query)
-        const queriedRestaurantObject = {};
-    } catch (error) {
+        restaurant = await queryDbStatic("restaurants", restaurantId, true, []);
 
+        // Queried userRestaurant object that lives in the user's field
+        const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
+        // User points filtered by the restaurantId
+        userPoints = userRestaurants[restaurantId]
+    } catch (error) {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
     }
     
-    // TBD once proactive topics are concluded
-    const points = 0
 
     const restaurantObject = {
-        name: queriedRestaurantObject.name,
-        image: queriedRestaurantObject.image,
+        name: restaurant.name,
+        image: restaurant.image,
         pt: restaurant.pt,
-        points: points,
-        address: queriedRestaurantObject.address,
-        prizes: queriedRestaurantObject.prizes,
+        points: userPoints,
+        address: restaurant.address,
+        prizes: restaurant.prizes,
     };
-
+    console.log(restaurantObject)
     res.status(200);
     res.send(restaurantObject);
 });
