@@ -36,7 +36,6 @@ router.get('/all/', async (req, res) => {
     // userRestaurant includes restaurantId and Points
     for (let userRestaurant in userRestaurants) {
         try {
-            console.log("userRestaurant", userRestaurant)
             // restaurant is the queried single restaurant object using userRestaurant.id
             const restaurant = await queryDbStatic("restaurants", userRestaurant, true, []);
 
@@ -52,14 +51,16 @@ router.get('/all/', async (req, res) => {
             // adds to list of general-view businesses
             restaurants.push(restaurantObject);
         
-            // returns the list of general-view businesses
-            res.send(restaurants);
+            
         } catch (error) {
             console.log(error)
             res.status(500);
             res.send("Uh oh! Something went wrong, please check back later.");
         }
     }
+    // returns the list of general-view businesses
+    console.log("endpoint: /restaurants/all, data: ", restaurants);
+    res.send(restaurants);
 });
 
 /* 
@@ -94,7 +95,7 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
         address: restaurant.address,
         prizes: restaurant.prizes,
     };
-    console.log(restaurantObject)
+    console.log("endpoint: /restaurants/restaurant/restaurantId, data: ", restaurantObject)
     res.status(200);
     res.send(restaurantObject);
 });
