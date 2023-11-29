@@ -1,5 +1,5 @@
 const express = require('express');
-const generateUUID = require("../controllers/uuidGenerator.js");
+const { generateUUID } = require("../controllers/uuidGenerator.js");
 const { writeDb, queryDbStatic } = require('../db.js')
 
 var router = express.Router();
@@ -80,13 +80,12 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
         // Queried userRestaurant object that lives in the user's field
         const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
         // User points filtered by the restaurantId
-        userPoints = userRestaurants[restaurantId]
+        userPoints = userRestaurants["userRestaurants"][restaurantId];
     } catch (error) {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
     }
     
-
     const restaurantObject = {
         name: restaurant.name,
         image: restaurant.image,
@@ -95,7 +94,8 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
         address: restaurant.address,
         prizes: restaurant.prizes,
     };
-    console.log("endpoint: /restaurants/restaurant/restaurantId, data: ", restaurantObject)
+    
+    console.log("endpoint: /restaurants/restaurant/restaurantId, data: ", restaurantObject);
     res.status(200);
     res.send(restaurantObject);
 });
@@ -103,41 +103,56 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
 // Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
 router.post('/restaurant/:restaurantId/visit/', function(req, res) {
-    const userId = req['userId'];
+    const userId = req.header('userId');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
-    const requestorName = `${userId}/${req['firstName']} ${req['lastName']}`
+    const requestorName = `${userId}/${req.header('firstName')} ${req.header('lastName')}`
     const restaurantId = req.params.restaurantId;
-    const restaurantName = req['restaurantName'];
-    const transactionId = generateUUID();
-    // Transaction sent to the restaurant
-    const visitTransaction = {
-        time: null,
-        requestor: requestorName,
-        isVisit: true,
-        transactionId: transactionId
+    // No need to query this as we 
+    if(!req.header('restaurantName')) {
+        res.status(500);
+        res.send("Uh oh! Please make sure you are requesting from the restaurant's page");
     }
+    const restaurantName = req.header('restaurantName');
+    const transactionId = generateUUID();
 
     // Transaction object saved on the user side
     const userVisitTransaction = {
-        time: null,
-        isVisit: true,
-        status: "REQUESTED",
-        restaurantId: restaurantId,
-        restaurantName: restaurantName,
-        transactionId: transactionId
+        [userId]: {
+            [transactionId]: {
+                time: null,
+                isVisit: true,
+                status: "REQUESTED",
+                restaurantId: restaurantId,
+                restaurantName: restaurantName,
+            }
+            
+        }
+    }
+
+    const restaurantVisitQueue = {
+        [restaurantId]: {
+            [transactionId]: {
+                time: null,
+                isVisit: true,
+                status: "REQUESTED",
+                requestor: requestorName,
+            }
+        }
     }
     
     try {
 
-        // Need to make a db call where we can locate the restaurant and insert the visitTransaction item into the queue list
+        // Inserts userVisitTransaction to the user's history list 
+        writeDb("userTransactions", userVisitTransaction);
 
-        // Inserts userVisitTransaction to the user's history list
+        // Inserts visit request to the restaurant's visit queue
+        writeDb("restaurantQueue", restaurantVisitQueue);
         
     } catch (error) {
-
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.")
     }
+    console.log("HERE")
     res.send("Request made!")
     res.status(200);
 });
@@ -145,42 +160,60 @@ router.post('/restaurant/:restaurantId/visit/', function(req, res) {
 // Sends transaction request into the restaurant's queue to get prize redemption approved - Sent from the user side
 /* Validates first in the database that they have reached the threshold */ 
 router.post('/restaurant/:restaurantId/redeem/', function(req, res) {
+    const userId = req.header('userId');
+    const prize = req.header('prize');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
-    const requestorName = `${req['userId']}/${req['firstName']} ${req['lastName']}` 
+    const requestorName = `${userId}/${req.header('firstName')} ${req.header('lastName')}`
     const restaurantId = req.params.restaurantId;
-    const restaurantName = req['restaurantName'];
+    // No need to query this as we 
+    if(!req.header('restaurantName')) {
+        res.status(500);
+        res.send("Uh oh! Please make sure you are requesting from the restaurant's page");
+    }
+    const restaurantName = req.header('restaurantName');
     const transactionId = generateUUID();
 
-    // Transaction sent to the restaurant
-    const redeemTransaction = {
-        time: null,
-        requestor: requestorName,
-        isVisit: false,
-        transactionId: transactionId
+    // Transaction object saved on the user side
+    const userRedeemTransaction = {
+        [userId]: {
+            [transactionId]: {
+                time: null,
+                isVisit: false,
+                status: "REQUESTED",
+                restaurantId: restaurantId,
+                restaurantName: restaurantName,
+                prize: prize
+            }
+        }
     }
 
-    // Transaction saved on the user side
-    const userRedeemTransaction = {
-        time: null,
-        isVisit: false,
-        status: "REQUESTED",
-        restaurantId: restaurantId,
-        restaurantName: restaurantName,
-        transactionId: transactionId 
+    const restaurantRedeemQueue = {
+        [restaurantId]: {
+            [transactionId]: {
+                time: null,
+                isVisit: false,
+                status: "REQUESTED",
+                requestor: requestorName,
+                prize: prize
+            }
+        }
     }
     
     try {
-        // Need to make a db call where we can locate the restaurant and insert the redeemTransaction item into the queue list
+
+        // Inserts userVisitTransaction to the user's history list 
+        writeDb("userTransactions", userRedeemTransaction);
+
+        // Inserts visit request to the restaurant's visit queue
+        writeDb("restaurantQueue", restaurantRedeemQueue);
         
-        // Inserts userRedeemTransaction to the user's history list
-        // Need to find a way to limit to 25
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send("Uh oh! Something went wrong, please check back later.")
     }
-
-    res.send("Request sent!")
     res.status(200);
+    res.send("Request made!")
 });
+
 
 module.exports = router;

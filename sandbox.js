@@ -39,7 +39,10 @@ function initializeDb () {
         pt: 100,
         image: "stringByte",
         address: "something something address here",
-        prizes: [prizeA, prizeB],
+        prizes: {
+          pa: prizeA,
+          pb: prizeB
+        },
         employees: ["ea"]
       }
 
@@ -50,7 +53,9 @@ function initializeDb () {
         pt: 100,
         image: "stringByte",
         address: "somewhere somewhere CP",
-        prizes: [prizeB],
+        prizes: {
+          pb: prizeB
+        },
         employees: ["eb"]
       }
 
@@ -90,13 +95,18 @@ function initializeDb () {
         status: "denied"
       }
 
-      const transactionC = {
+      const userTransactionA = {
         time: null,
-        approver: null,
-        requestor: "3323-1sf2-oupq-01pb/Joe Goldberg",
+        isVisit: true,
+        restaurant: "ra/Yolo Chicken",
+        status: "approved"
+      }
+
+      const userTransactionB = {
+        time: null,
         isVisit: false,
-        item: "pb",
-        id: "tc",
+        prize: "pb/tik tok pookie",
+        restaurant: "rb/Gopchang",
         status: "denied"
       }
 
@@ -118,25 +128,24 @@ function initializeDb () {
 
       const userTransactions = {
         "3323-1sf2-oupq-01pa": {
-          "tb": transactionB,
+          "tb": userTransactionB,
         },
         "3323-1sf2-oupq-01pa": {
-          "ta": transactionA,
-          "tc": transactionC
+          "ta": userTransactionA,
         }
       } 
 
       const restaurantQueue = {
         "ra": {
-          "tc": transactionC
+          "ta": transactionA,
+          "holder": "holder"
         },
         "rb": {}
       }
 
       const restaurantHistory = {
         "ra": {
-          "ta": transactionA
-          // transactionC excluded on purpose
+          "ta": transactionA, 
         },
         "rb": {
           "tb": transactionB

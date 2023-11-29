@@ -4,6 +4,8 @@ const { url } =  require("inspector");
 const { endianness } =  require("os");
 
 module.exports = {
+
+  // https://github.com/firebase/snippets-web/tree/d781c67b528afe99fcdb7c7056104772463fa3ec/snippets/database-next/read-and-write
   
   // import { getDatabase } from "firebase/database";
 
@@ -17,7 +19,7 @@ module.exports = {
    * @param {*} target      Target field to update data
    * @param {*} updatedData New Data to input
    */
-  updateData: function(table, id, target, updatedData){
+  updateDb: async function(table, id, target, updatedData){
     const firebaseConfig = {
       // ...
       // The value of `databaseURL` depends on the location of the database
@@ -34,7 +36,7 @@ module.exports = {
     // Set a reference for the database
     const databaseRef = ref(database);
 
-    update(ref(database, table+ "/" + id), {
+    await update(ref(database, table + "/" + id), {
       [target] : updatedData
     })
     .then(() =>{
@@ -45,10 +47,6 @@ module.exports = {
       throw error;
     });
   },
-
-  // https://github.com/firebase/snippets-web/tree/d781c67b528afe99fcdb7c7056104772463fa3ec/snippets/database-next/read-and-write
-
-
 
   writeDb: async function(table, object){
     const firebaseConfig = {
@@ -63,24 +61,21 @@ module.exports = {
   
     // Initialize Realtime Database and get a reference to the service
     const database = getDatabase(app);
-  
-    // Set a reference for the database
-    const databaseRef = ref(database);
-
     
+    // Iterates the object and assigns the key to value in the database
     Object.keys(object).forEach(async (key) => {
       try {
         await set(ref(database, `${table}/` + key), object[key])
-        console.log("User data successfully written for " + key);
+        console.log("Data successfully written for " + table + key);
       } catch (error) {
-        console.log("User data failed to write for " + userId +" | "+ error);
+        console.log(error)
         throw error;
       }
     })
   },
 
   // Given an object type, id, boolean, and field, query and return that object. If the field is empty, return the whole object. If the boolean is false, exclude the fields when returning the object
-  queryDbStatic: async function(objectType, path, exclude, fields) {
+  queryDbStatic: async function(table, objectId, exclude, fields) {
     const firebaseConfig = {
       // ...
       // The value of `databaseURL` depends on the location of the database
@@ -96,9 +91,9 @@ module.exports = {
   
     // Set a reference for the database
     const databaseRef = ref(database);
-    console.log("path: ", path)
+    console.log("objectId: ", objectId)
     try {
-      const snapshot = await get(ref(database, `${objectType}/${path}`));
+      const snapshot = await get(ref(database, `${table}/${objectId}`));
       if (snapshot.exists()) {
         // The object retrieved from the database query
         let fullObject = snapshot.val();
@@ -112,7 +107,7 @@ module.exports = {
           // filters out the necessary fields
           filteredObject = fullObject;
 
-          for(field of fields) {
+          for(let field of fields) {
             delete filteredObject[field]; // filter out (remove) the desired field
             console.log(filteredObject)
           }
@@ -140,31 +135,30 @@ module.exports = {
     }
   },
 
-  updateArrayElement: function(objectType, id, key, value, isArray) {
-    if(isArray){
+  // Deletes an object from the table given the id
+  deleteDb: async function(table, objectId, field) {
+    const firebaseConfig = {
+      // ...
+      // The value of `databaseURL` depends on the location of the database
+      databaseURL: "https://rewards-c59a2-default-rtdb.firebaseio.com/",
+    };
+  
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+  
+  
+    // Initialize Realtime Database and get a reference to the service
+    const database = getDatabase(app);
 
-    } else {
-        const newPostKey = push(child(ref(database), 'posts')).key;
-    }
-
-  },
-
-  appendArrayElement: function() {
-
-  },
-
-  removeArrayElement: function() {
-
-  },
-
-  getArrayElement: function() {
-
-  },
-
-  // From queue to history - maybe we don't abstract this
-  moveArrayElement: function() {
-    getArrayElement();
-    appendArrayElement();
-    removeArrayElement();
-  },
+    await update(ref(database, table + "/" + objectId), {
+      [field]: {}
+    })
+    .then(() =>{
+      console.log("Data successfully deleted for " + table + "/" + objectId);
+    })
+    .catch((error) =>{
+      console.log("Data failed to updated for " + table + "/" + objectId);
+      throw error;
+    });
+  }
 }
