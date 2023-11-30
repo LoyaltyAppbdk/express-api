@@ -14,13 +14,18 @@ const PORT = 3001;
 // !!! nonprod uncomment 
 
 const app = express(); 
+const restaurants = require('./routes/restaurants.js')
+const business = require('./routes/business.js')
+app.use(cors(corsOptions))
 app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
 app.use(require('./routes'));
-app.use(cors(corsOptions))
-app.use(express.json())
+app.use('/restaurants', restaurants);
+app.use('/my-business', business);
+app.use(express.json());
+
 
 app.use(routes)
 // app.get('/', (req, res) => { 

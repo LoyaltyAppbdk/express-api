@@ -2,13 +2,9 @@ const express = require('express');
 const baseHeader = require('../constants/baseHeader');
 const generateUUID = require("../controllers/uuidGenerator");
 
+const { writeDb, queryDbStatic } = require('../db.js')
+
 var router = express.Router();
-/* GET restaurants queue */
-/* Returns: list of users */
-/* In list of users, we have the visits and threshold OR the item, as well as their name*/
-router.get('my-business/', function(req, res) {
-    let user = req['user']
-})
 
 // Create user request
 
@@ -52,7 +48,6 @@ router.get('/confirmed/', function(req, res) {
     console.log('here')
     res.send("confirmed")
 });
-
 
 /* TODO: Add a history of accepted */
 module.exports = router;
