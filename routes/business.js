@@ -29,10 +29,17 @@ router.post('/customer-request/accept', async function(req, res) {
         // Removes from the restaurants queue
         await deleteDb("restaurantQueue", restaurantId, transactionId);
         
-        // !!! remove points from user
+        // Removes points from user
+        const customer = await queryDbStatic("users", requestorId, false, []);
+        const restaurant = await queryDbStatic("restaurants", restaurantId, false, []);
+        const pt = restaurant['pt'];
+        const newPoints = customer["userRestaurants"][restaurantId] - pt;
+        await updateDb("users", requestorId, `userRestaurants/${restaurantId}`, newPoints);
+
     } catch (error) {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
+        return;
     }
     res.status(200);
     res.send("Successfully approved customer request")
@@ -62,9 +69,10 @@ router.post('/customer-request/decline', async function(req, res) {
     } catch (error) {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
+        return;
     }
     res.status(200);
-    res.send("Successfully denied customer request")
+    res.send("Successfully denied customer request");
 });
 
 module.exports = router;

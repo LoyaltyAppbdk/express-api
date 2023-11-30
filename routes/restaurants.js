@@ -56,6 +56,7 @@ router.get('/all/', async (req, res) => {
             console.log(error)
             res.status(500);
             res.send("Uh oh! Something went wrong, please check back later.");
+            return;
         }
     }
     // returns the list of general-view businesses
@@ -84,6 +85,7 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
     } catch (error) {
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
+        return;
     }
     
     const restaurantObject = {
@@ -102,7 +104,8 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
 
 // Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
-router.post('/restaurant/:restaurantId/visit/', function(req, res) {
+router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
+    // !!! Need to validate that the user has enough point
     const userId = req.header('userId');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
     const requestorName = `${userId}/${req.header('firstName')} ${req.header('lastName')}`
@@ -141,25 +144,36 @@ router.post('/restaurant/:restaurantId/visit/', function(req, res) {
     }
     
     try {
+        // This block validates that the user has enough points before sending the request
+
+        // Gets the point threshold for the restaurant
+        const restaurantPT = await queryDbStatic("restaurants", restaurantId, false, ["pt"]);
+        // Gets the user's current points for the restaurant 
+        const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
+        const userPoints = userRestaurants["userRestaurants"][restaurantId];
+        // Throws 500 if insufficient as the user shouldn't be able to access this endpoint
+        if(restaurantPT['pt'] > userPoints){
+            throw new Error("Insufficient points");
+        }
 
         // Inserts userVisitTransaction to the user's history list 
-        writeDb("userTransactions", userVisitTransaction);
+        await writeDb("userTransactions", userVisitTransaction);
 
         // Inserts visit request to the restaurant's visit queue
-        writeDb("restaurantQueue", restaurantVisitQueue);
+        await writeDb("restaurantQueue", restaurantVisitQueue);
         
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.")
+        res.send("Uh oh! Something went wrong, please check back later.");
+        return;
     }
-    console.log("HERE")
     res.send("Request made!")
     res.status(200);
 });
 
 // Sends transaction request into the restaurant's queue to get prize redemption approved - Sent from the user side
 /* Validates first in the database that they have reached the threshold */ 
-router.post('/restaurant/:restaurantId/redeem/', function(req, res) {
+router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
     const userId = req.header('userId');
     const prize = req.header('prize');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
@@ -200,19 +214,30 @@ router.post('/restaurant/:restaurantId/redeem/', function(req, res) {
     }
     
     try {
+        // This block validates that the user has enough points before sending the request
 
+        // Gets the point threshold for the restaurant
+        const restaurantPT = await queryDbStatic("restaurants", restaurantId, false, ["pt"]);
+        // Gets the user's current points for the restaurant 
+        const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
+        const userPoints = userRestaurants["userRestaurants"][restaurantId];
+        // Throws 500 if insufficient as the user shouldn't be able to access this endpoint
+        if(restaurantPT['pt'] > userPoints){
+            throw new Error("Insufficient points");
+        }
         // Inserts userVisitTransaction to the user's history list 
-        writeDb("userTransactions", userRedeemTransaction);
+        await writeDb("userTransactions", userRedeemTransaction);
 
         // Inserts visit request to the restaurant's visit queue
-        writeDb("restaurantQueue", restaurantRedeemQueue);
+        await writeDb("restaurantQueue", restaurantRedeemQueue);
         
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.")
+        res.send("Uh oh! Something went wrong, please check back later.");
+        return;
     }
     res.status(200);
-    res.send("Request made!")
+    res.send("Request made!");
 });
 
 

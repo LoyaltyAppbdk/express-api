@@ -109,7 +109,6 @@ module.exports = {
 
           for(let field of fields) {
             delete filteredObject[field]; // filter out (remove) the desired field
-            console.log(filteredObject)
           }
 
         } else {
@@ -122,8 +121,6 @@ module.exports = {
 
         // If filteredObject not empty (AKA fields are provided) then we set fullObject to filteredObject 
         fullObject = (JSON.stringify(filteredObject) === '{}' ? fullObject : filteredObject );
-
-        console.log('OBJECT: ', fullObject)
         return fullObject;
 
       } else {
