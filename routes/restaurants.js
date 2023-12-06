@@ -16,11 +16,14 @@ Retrieves UserRestaurants from User (via userId)
 router.get('/all/', async (req, res) => {
     
     const userId = req.header('userId');
+    console.log(req.header['userId'])
+    console.log(userId)
     let query;
 
     try {
         // Query for the user's restaurant list using userId variable
         query = await queryDbStatic("users", userId, false, ["userRestaurants"]);
+        console.log(query)
     } catch (error) {
         console.log(error)
         res.status(500);
@@ -151,10 +154,6 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
         // Gets the user's current points for the restaurant 
         const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
         const userPoints = userRestaurants["userRestaurants"][restaurantId];
-        // Throws 500 if insufficient as the user shouldn't be able to access this endpoint
-        if(restaurantPT['pt'] > userPoints){
-            throw new Error("Insufficient points");
-        }
 
         // Inserts userVisitTransaction to the user's history list 
         await writeDb("userTransactions", userVisitTransaction);
@@ -162,7 +161,11 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
         // Inserts visit request to the restaurant's visit queue
         await writeDb("restaurantQueue", restaurantVisitQueue);
         
+        // Inserts visit request to the restaurant's visit history
+        await writeDb("restaurantHistory", restaurantVisitQueue);
+
     } catch (error) {
+        console.log(error)
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
         return;
@@ -225,11 +228,14 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
         if(restaurantPT['pt'] > userPoints){
             throw new Error("Insufficient points");
         }
-        // Inserts userVisitTransaction to the user's history list 
+        // Inserts userRedeemTransaction to the user's history list 
         await writeDb("userTransactions", userRedeemTransaction);
 
-        // Inserts visit request to the restaurant's visit queue
+        // Inserts visit request to the restaurant's redeem queue
         await writeDb("restaurantQueue", restaurantRedeemQueue);
+
+        // Inserts visit request to the restaurant's redeem history
+        await writeDb("restaurantHistory", restaurantRedeemQueue);
         
     } catch (error) {
         res.status(500);

@@ -16,7 +16,7 @@ router.post('/customer-request/accept', async function(req, res) {
     const transactionId = req.header('transactionId');
     const restaurantId = req.header('restaurantId');
 
-    const requestorId = req.header('requestorId')
+    const requestorId = req.header('requestorId');
 
     try {
         // Updates the status of the restaurant transaction and assigns the approver

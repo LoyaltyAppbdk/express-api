@@ -8,7 +8,7 @@ function initializeDb () {
         id: "3323-1sf2-oupq-01pa",
         phone: "000-000-000",
         pw: "123123123",
-        userRestaurants: {ra: 10}
+        userRestaurants: {ra: 100}
       }
 
       const userB = {
