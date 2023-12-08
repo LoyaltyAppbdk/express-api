@@ -46,7 +46,7 @@ router.get('/all/', async (req, res) => {
             let restaurantObject = {
                 name: restaurant.name,
                 image: restaurant.image,
-                // Retrieves from userRestaurants query object, using the key from the current loop to get the point
+                id: restaurant.id,
                 currentVisit: userRestaurants[userRestaurant],
                 pt: restaurant.pt,
             }
@@ -95,7 +95,7 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
         name: restaurant.name,
         image: restaurant.image,
         pt: restaurant.pt,
-        points: userPoints,
+        currentVisit: userPoints,
         address: restaurant.address,
         prizes: restaurant.prizes,
     };
@@ -108,6 +108,7 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
 // Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
 router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
+    const dateTime = new Date().toLocaleString();
     // !!! Need to validate that the user has enough point
     const userId = req.header('userId');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
@@ -125,7 +126,7 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
     const userVisitTransaction = {
         [userId]: {
             [transactionId]: {
-                time: null,
+                time: dateTime,
                 isVisit: true,
                 status: "REQUESTED",
                 restaurantId: restaurantId,
@@ -138,7 +139,7 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
     const restaurantVisitQueue = {
         [restaurantId]: {
             [transactionId]: {
-                time: null,
+                time: dateTime,
                 isVisit: true,
                 status: "REQUESTED",
                 requestor: requestorName,
@@ -147,13 +148,6 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
     }
     
     try {
-        // This block validates that the user has enough points before sending the request
-
-        // Gets the point threshold for the restaurant
-        const restaurantPT = await queryDbStatic("restaurants", restaurantId, false, ["pt"]);
-        // Gets the user's current points for the restaurant 
-        const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
-        const userPoints = userRestaurants["userRestaurants"][restaurantId];
 
         // Inserts userVisitTransaction to the user's history list 
         await writeDb("userTransactions", userVisitTransaction);
@@ -177,6 +171,7 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
 // Sends transaction request into the restaurant's queue to get prize redemption approved - Sent from the user side
 /* Validates first in the database that they have reached the threshold */ 
 router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
+    const dateTime = new Date().toLocaleString();
     const userId = req.header('userId');
     const prize = req.header('prize');
     // Constructs the requestor name (frontend should be able to pick up first, last, and userId after sign-in AKA should be cached)
@@ -194,7 +189,7 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
     const userRedeemTransaction = {
         [userId]: {
             [transactionId]: {
-                time: null,
+                time: dateTime,
                 isVisit: false,
                 status: "REQUESTED",
                 restaurantId: restaurantId,
@@ -207,7 +202,7 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
     const restaurantRedeemQueue = {
         [restaurantId]: {
             [transactionId]: {
-                time: null,
+                time: dateTime,
                 isVisit: false,
                 status: "REQUESTED",
                 requestor: requestorName,

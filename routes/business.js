@@ -19,6 +19,13 @@ router.post('/customer-request/accept', async function(req, res) {
     const requestorId = req.header('requestorId');
 
     try {
+        // Validates that the approver is an employee for the requested restaurant
+        const validationId = await queryDbStatic("employees", userId, false, ["restaurantId"]);
+        // Safe since we are only searching for transactions under the header provided restaurantId
+        if(validationId["restaurantId"] !== restaurantId){
+            throw new Error("Unauthorized operation attempted");
+        } 
+
         // Updates the status of the restaurant transaction and assigns the approver
         await updateDb("restaurantHistory", restaurantId, `${transactionId}/status`, "APPROVED");
         await updateDb("restaurantHistory", restaurantId, `${transactionId}/approver`, approver);
@@ -46,6 +53,13 @@ router.post('/customer-request/accept', async function(req, res) {
 });
 
 router.post('/customer-request/decline', async function(req, res) {
+    // Validates that the approver is an employee for the requested restaurant
+    const validationId = await queryDbStatic("employees", userId, false, ["restaurantId"]);
+    // Safe since we are only searching for transactions under the header provided restaurantId
+    if(validationId["restaurantId"] !== restaurantId){
+        throw new Error("Unauthorized operation attempted");
+    } 
+    
     // Name of the approved/decliner
     const userId = req.header('userId');
     const approver = `${userId}/${req.header('firstName')} ${req.header('lastName')}`;
