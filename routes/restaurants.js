@@ -50,7 +50,7 @@ router.get('/all/', async (req, res) => {
                 currentVisit: userRestaurants[userRestaurant],
                 pt: restaurant.pt,
             }
-
+            
             // adds to list of general-view businesses
             restaurants.push(restaurantObject);
         
@@ -124,39 +124,45 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
 
     // Transaction object saved on the user side
     const userVisitTransaction = {
-        [userId]: {
-            [transactionId]: {
-                time: dateTime,
-                isVisit: true,
-                status: "REQUESTED",
-                restaurantId: restaurantId,
-                restaurantName: restaurantName,
-            }
-            
-        }
+        [transactionId]: {
+            time: dateTime,
+            isVisit: true,
+            status: "REQUESTED",
+            restaurantId: restaurantId,
+            restaurantName: restaurantName,
+        }            
     }
 
     const restaurantVisitQueue = {
-        [restaurantId]: {
-            [transactionId]: {
-                time: dateTime,
-                isVisit: true,
-                status: "REQUESTED",
-                requestor: requestorName,
-            }
+        [transactionId]: {
+            time: dateTime,
+            isVisit: true,
+            status: "REQUESTED",
+            requestor: requestorName,
         }
     }
     
     try {
 
+        const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);        
+        // Makes sure that a visit isn't already in progress. If it is, then we don't proceed to submit another request
+        if(userRestaurants["userRestaurants"][restaurantId]["visitInProgress"]) {
+            res.status(200);
+            res.send("A visit is already in progress");
+            return;
+        }
+
         // Inserts userVisitTransaction to the user's history list 
-        await writeDb("userTransactions", userVisitTransaction);
+        await writeDb(`userTransactions/${userId}`, userVisitTransaction);
 
         // Inserts visit request to the restaurant's visit queue
-        await writeDb("restaurantQueue", restaurantVisitQueue);
+        await writeDb(`restaurantQueue/${restaurantId}`, restaurantVisitQueue);
         
         // Inserts visit request to the restaurant's visit history
-        await writeDb("restaurantHistory", restaurantVisitQueue);
+        await writeDb(`restaurantHistory/${restaurantId}`, restaurantVisitQueue);
+
+        // Sets visit in progress identifier to true
+        await writeDb(`users/${userId}/userRestaurants/${restaurantId}`, {visitInProgress: true});
 
     } catch (error) {
         console.log(error)
@@ -187,29 +193,26 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
 
     // Transaction object saved on the user side
     const userRedeemTransaction = {
-        [userId]: {
-            [transactionId]: {
-                time: dateTime,
-                isVisit: false,
-                status: "REQUESTED",
-                restaurantId: restaurantId,
-                restaurantName: restaurantName,
-                prize: prize
-            }
+        [transactionId]: {
+            time: dateTime,
+            isVisit: false,
+            status: "REQUESTED",
+            restaurantId: restaurantId,
+            restaurantName: restaurantName,
+            prize: prize
         }
     }
 
     const restaurantRedeemQueue = {
-        [restaurantId]: {
-            [transactionId]: {
-                time: dateTime,
-                isVisit: false,
-                status: "REQUESTED",
-                requestor: requestorName,
-                prize: prize
-            }
+        [transactionId]: {
+            time: dateTime,
+            isVisit: false,
+            status: "REQUESTED",
+            requestor: requestorName,
+            prize: prize
         }
     }
+
     
     try {
         // This block validates that the user has enough points before sending the request
@@ -218,27 +221,42 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
         const restaurantPT = await queryDbStatic("restaurants", restaurantId, false, ["pt"]);
         // Gets the user's current points for the restaurant 
         const userRestaurants = await queryDbStatic("users", userId, false, ["userRestaurants"]);
-        const userPoints = userRestaurants["userRestaurants"][restaurantId];
+        const userPoints = userRestaurants["userRestaurants"][restaurantId]["points"];
+        
+        // Makes sure that a redeem isn't already in progress. If it is, then we don't proceed to submit another request
+        if(userRestaurants["userRestaurants"][restaurantId]["redeemInProgress"]) {
+            res.status(200);
+            res.send("A redeem is already in progress");
+            return;
+        }
+        
         // Throws 500 if insufficient as the user shouldn't be able to access this endpoint
         if(restaurantPT['pt'] > userPoints){
-            throw new Error("Insufficient points");
+            res.status(500);
+            res.send("Insufficient points");
+            return;
         }
         // Inserts userRedeemTransaction to the user's history list 
-        await writeDb("userTransactions", userRedeemTransaction);
+        await writeDb(`userTransactions/${userId}`, userRedeemTransaction);
 
         // Inserts visit request to the restaurant's redeem queue
-        await writeDb("restaurantQueue", restaurantRedeemQueue);
+        await writeDb(`restaurantQueue/${restaurantId}`, restaurantRedeemQueue);
 
         // Inserts visit request to the restaurant's redeem history
-        await writeDb("restaurantHistory", restaurantRedeemQueue);
+        await writeDb(`restaurantHistory/${restaurantId}`, restaurantRedeemQueue);
+
+        // Sets redeem in progress identifier to true
+        await writeDb(`users/${userId}/userRestaurants/${restaurantId}`, {redeemInProgress: true});
         
+        res.status(200);
+        res.send("Request made!");
     } catch (error) {
+        console.log(error)
         res.status(500);
         res.send("Uh oh! Something went wrong, please check back later.");
         return;
     }
-    res.status(200);
-    res.send("Request made!");
+    return;
 });
 
 
