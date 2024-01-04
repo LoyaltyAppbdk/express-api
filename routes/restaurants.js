@@ -105,6 +105,30 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
     res.send(restaurantObject);
 });
 
+router.get('/restaurant/:restaurantId/history', async (req, res) => {
+    console.log("HERE")
+    const userId = req.header('userId');
+    const restaurantId = req.params.restaurantId;
+    let transactions, ret = [];
+
+    try {
+        transactions = await queryDbStatic(`userTransactions/${userId}`, restaurantId, false, []);
+        console.log(transactions)
+    } catch (error) {
+        res.status(500);
+        res.send(error);
+        return;
+    }
+    for(let transaction in transactions) {
+        transactions[transaction].id = transaction;
+       ret.push(transactions[transaction]);
+    }
+    console.log("endpoint: /customer-resquests/history, data: ", ret);
+    res.status(200);
+    res.send(ret);
+    return;
+})
+
 // Sends transaction request into the restaurant's queue to get visit approved - Sent from the user side
 // FOR APPROVAL/DECLINE, WE WILL PARSE THE REQUESTOR FIELD IN ORDER TO ADD A VISIT
 router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
@@ -153,7 +177,7 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
         }
 
         // Inserts userVisitTransaction to the user's history list 
-        await writeDb(`userTransactions/${userId}`, userVisitTransaction);
+        await writeDb(`userTransactions/${userId}/${restaurantId}`, userVisitTransaction);
 
         // Inserts visit request to the restaurant's visit queue
         await writeDb(`restaurantQueue/${restaurantId}`, restaurantVisitQueue);
@@ -237,7 +261,7 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
             return;
         }
         // Inserts userRedeemTransaction to the user's history list 
-        await writeDb(`userTransactions/${userId}`, userRedeemTransaction);
+        await writeDb(`userTransactions/${userId}/${restaurantId}`, userRedeemTransaction);
 
         // Inserts visit request to the restaurant's redeem queue
         await writeDb(`restaurantQueue/${restaurantId}`, restaurantRedeemQueue);
@@ -258,6 +282,5 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
     }
     return;
 });
-
 
 module.exports = router;

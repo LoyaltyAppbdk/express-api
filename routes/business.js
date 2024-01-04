@@ -22,7 +22,7 @@ router.post('/customer-request/accept', async function(req, res) {
         // Validates that the approver is an employee for the requested restaurant
         const validationId = await queryDbStatic("employees", userId, false, ["restaurantId"]);
 
-        const isVisit = await queryDbStatic(`userTransactions/${requestorId}`, transactionId, false, ["isVisit"]);
+        const isVisit = await queryDbStatic(`userTransactions/${requestorId}/${restaurantId}`, transactionId, false, ["isVisit"]);
 
         // Safe since we are only searching for transactions under the header provided restaurantId
         if(validationId["restaurantId"] !== restaurantId){
@@ -34,7 +34,7 @@ router.post('/customer-request/accept', async function(req, res) {
         await updateDb("restaurantHistory", restaurantId, `${transactionId}/approver`, approver);
         
         // Updates the status of the transaction for the user
-        await updateDb("userTransactions", requestorId, `${transactionId}/status`, "APPROVED");
+        await updateDb(`userTransactions/${requestorId}`, restaurantId, `${transactionId}/status`, "APPROVED");
 
         // Removes from the restaurants queue
         await deleteDb("restaurantQueue", restaurantId, transactionId);
@@ -84,9 +84,9 @@ router.post('/customer-request/decline', async function(req, res) {
         await updateDb("restaurantHistory", restaurantId, `${transactionId}/approver`, approver);
         
         // Updates the status of the transaction for the user
-        await updateDb("userTransactions", requestorId, `${transactionId}/status`, "DECLINED");
+        await updateDb(`userTransactions/${requestorId}`, restaurantId, `${transactionId}/status`, "DECLINED");
 
-        const isVisit = await queryDbStatic(`userTransactions/${requestorId}`, transactionId, false, ["isVisit"]);
+        const isVisit = await queryDbStatic(`userTransactions/${requestorId}/${restaurantId}`, transactionId, false, ["isVisit"]);
         const visitOrRedeem = isVisit.isVisit ? "visitInProgress" : "redeemInProgress";
         
         // sets the redeem/visit in progress field to false again 

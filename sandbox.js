@@ -138,7 +138,6 @@ function initializeDb () {
       const restaurantQueue = {
         "ra": {
           "ta": transactionA,
-          "holder": "holder"
         },
         "rb": {}
       }
