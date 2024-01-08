@@ -53,7 +53,6 @@ router.get('/all/', async (req, res) => {
             
             // adds to list of general-view businesses
             restaurants.push(restaurantObject);
-        
             
         } catch (error) {
             console.log(error)
@@ -121,8 +120,17 @@ router.get('/restaurant/:restaurantId/history', async (req, res) => {
     }
     for(let transaction in transactions) {
         transactions[transaction].id = transaction;
-       ret.push(transactions[transaction]);
+        ret.push(transactions[transaction]);
     }
+
+    ret = requests.sort((a, b) => {
+        const aTime = new Date(a.time).valueOf()
+        const bTime = new Date(b.time).valueOf()
+        return bTime - aTime;
+    })
+
+    ret.slice(0,25)
+
     console.log("endpoint: /customer-resquests/history, data: ", ret);
     res.status(200);
     res.send(ret);

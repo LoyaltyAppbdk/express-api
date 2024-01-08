@@ -121,6 +121,13 @@ router.get('/customer-request/all', async function(req, res) {
         transactions[transaction].id = transaction;
        ret.push(transactions[transaction]);
     }
+
+    ret = requests.sort((a, b) => {
+        const aTime = new Date(a.time).valueOf()
+        const bTime = new Date(b.time).valueOf()
+        return bTime - aTime;
+    })
+
     console.log("endpoint: /customer-resquests/all, data: ", ret);
     res.status(200);
     res.send(ret);
@@ -144,6 +151,15 @@ router.get('/customer-request/history', async function(req, res) {
         transactions[transaction].id = transaction;
        ret.push(transactions[transaction]);
     }
+
+    ret = requests.sort((a, b) => {
+        const aTime = new Date(a.time).valueOf()
+        const bTime = new Date(b.time).valueOf()
+        return bTime - aTime;
+    })
+
+    ret.slice(0,25)
+
     console.log("endpoint: /customer-resquests/history, data: ", ret);
     res.status(200);
     res.send(ret);
