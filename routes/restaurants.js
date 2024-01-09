@@ -123,7 +123,7 @@ router.get('/restaurant/:restaurantId/history', async (req, res) => {
         ret.push(transactions[transaction]);
     }
 
-    ret = requests.sort((a, b) => {
+    ret = ret.sort((a, b) => {
         const aTime = new Date(a.time).valueOf()
         const bTime = new Date(b.time).valueOf()
         return bTime - aTime;
