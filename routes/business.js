@@ -1,5 +1,5 @@
 const express = require('express');
-const { generateUUID } = require("../controllers/uuidGenerator");
+const { generateUUID } = require("../helpers/uuidGenerator");
 const { queryDbStatic, writeDb, updateDb, deleteDb } = require('../db');
 
 var router = express.Router();
@@ -54,11 +54,12 @@ router.post('/customer-request/accept', async function(req, res) {
 
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     res.status(200);
-    res.send("Successfully approved customer request")
+    res.statusMessage = "Successfully approved customer request";
+    res.send({data: "Successfully approved customer request"});
 });
 
 router.post('/customer-request/decline', async function(req, res) {
@@ -96,11 +97,12 @@ router.post('/customer-request/decline', async function(req, res) {
         await deleteDb("restaurantQueue", restaurantId, transactionId);
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     res.status(200);
-    res.send("Successfully denied customer request");
+    res.statusMessage = "Successfully denied customer request";
+    res.send({data: "Successfully denied customer request"});
 });
 
 router.get('/customer-request/all', async function(req, res) {
@@ -113,7 +115,8 @@ router.get('/customer-request/all', async function(req, res) {
     } catch (error) {
         res.status(500);
         console.log(error);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.statusMessage = "Uh oh! Something went wrong, please check back later.";
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     
@@ -143,7 +146,7 @@ router.get('/customer-request/history', async function(req, res) {
     } catch (error) {
         res.status(500);
         console.log(error);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     
