@@ -1,5 +1,5 @@
 const express = require('express');
-const { generateUUID } = require("../controllers/uuidGenerator.js");
+const { generateUUID } = require("../helpers/uuidGenerator.js");
 const { writeDb, queryDbStatic } = require('../db.js')
 
 var router = express.Router();
@@ -14,7 +14,6 @@ MY-POINTS PAGE
 Retrieves UserRestaurants from User (via userId)
 */
 router.get('/all/', async (req, res) => {
-    
     const userId = req.header('userId');
     console.log(req.header['userId'])
     console.log(userId)
@@ -27,7 +26,8 @@ router.get('/all/', async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.statusMessage = "Uh oh! Something went wrong, please check back later.";
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
     }
 
     // List of restaurantObject (return object)
@@ -57,7 +57,8 @@ router.get('/all/', async (req, res) => {
         } catch (error) {
             console.log(error)
             res.status(500);
-            res.send("Uh oh! Something went wrong, please check back later.");
+            res.statusMessage = "Uh oh! Something went wrong, please check back later.";
+            res.send({data: "Uh oh! Something went wrong, please check back later."});
             return;
         }
     }
@@ -86,7 +87,7 @@ router.get('/restaurant/:restaurantId', async (req, res) => {
         userPoints = userRestaurants["userRestaurants"][restaurantId];
     } catch (error) {
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     
@@ -115,7 +116,7 @@ router.get('/restaurant/:restaurantId/history', async (req, res) => {
         console.log(transactions)
     } catch (error) {
         res.status(500);
-        res.send(error);
+        res.send({data: error});
         return;
     }
     for(let transaction in transactions) {
@@ -123,7 +124,7 @@ router.get('/restaurant/:restaurantId/history', async (req, res) => {
         ret.push(transactions[transaction]);
     }
 
-    ret = requests.sort((a, b) => {
+    ret = ret.sort((a, b) => {
         const aTime = new Date(a.time).valueOf()
         const bTime = new Date(b.time).valueOf()
         return bTime - aTime;
@@ -149,7 +150,8 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
     // No need to query this as we 
     if(!req.header('restaurantName')) {
         res.status(500);
-        res.send("Uh oh! Please make sure you are requesting from the restaurant's page");
+        res.statusMessage = "Uh oh! Please make sure you are requesting from the restaurant's page";
+        res.send({data: "Uh oh! Please make sure you are requesting from the restaurant's page"});
     }
     const restaurantName = req.header('restaurantName');
     const transactionId = generateUUID();
@@ -180,7 +182,8 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
         // Makes sure that a visit isn't already in progress. If it is, then we don't proceed to submit another request
         if(userRestaurants["userRestaurants"][restaurantId]["visitInProgress"]) {
             res.status(200);
-            res.send("A visit is already in progress");
+            res.statusMessage = "A visit is already in progress";
+            res.send({data: "A visit is already in progress"});
             return;
         }
 
@@ -199,10 +202,11 @@ router.post('/restaurant/:restaurantId/visit/', async (req, res) => {
     } catch (error) {
         console.log(error)
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.statusMessage = "Uh oh! Something went wrong, please check back later.";
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
-    res.send("Request made!")
+    res.send({data: "Request made!"})
     res.status(200);
 });
 
@@ -218,7 +222,8 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
     // No need to query this as we 
     if(!req.header('restaurantName')) {
         res.status(500);
-        res.send("Uh oh! Please make sure you are requesting from the restaurant's page");
+        res.statusMessage = "Uh oh! Please make sure you are requesting from the restaurant's page";
+        res.send({data: "Uh oh! Please make sure you are requesting from the restaurant's page"});
     }
     const restaurantName = req.header('restaurantName');
     const transactionId = generateUUID();
@@ -258,14 +263,16 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
         // Makes sure that a redeem isn't already in progress. If it is, then we don't proceed to submit another request
         if(userRestaurants["userRestaurants"][restaurantId]["redeemInProgress"]) {
             res.status(200);
-            res.send("A redeem is already in progress");
+            res.statusMessage = "A redeem is already in progress";
+            res.send({data: "A redeem is already in progress"});
             return;
         }
         
         // Throws 500 if insufficient as the user shouldn't be able to access this endpoint
         if(restaurantPT['pt'] > userPoints){
             res.status(500);
-            res.send("Insufficient points");
+            res.statusMessage = "Insufficient points";
+            res.send({data: "Insufficient points"});
             return;
         }
         // Inserts userRedeemTransaction to the user's history list 
@@ -281,11 +288,12 @@ router.post('/restaurant/:restaurantId/redeem/', async (req, res) => {
         await writeDb(`users/${userId}/userRestaurants/${restaurantId}`, {redeemInProgress: true});
         
         res.status(200);
-        res.send("Request made!");
+        res.statusMessage = "Request made!";
+        res.send({data: "Request made!"});
     } catch (error) {
         console.log(error)
         res.status(500);
-        res.send("Uh oh! Something went wrong, please check back later.");
+        res.send({data: "Uh oh! Something went wrong, please check back later."});
         return;
     }
     return;
